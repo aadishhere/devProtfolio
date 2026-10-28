@@ -9,22 +9,6 @@
 
 ---
 
-## 🚀 How to Run Locally
-
-You can run this portfolio locally on any Mac or Linux machine with one command:
-
-```bash
-./start.sh
-```
-
-Or manually:
-```bash
-python3 -m http.server 8000
-```
-Then open [http://localhost:8000](http://localhost:8000) in your browser.
-
----
-
 ## ✨ Features
 
 - **🎮 PM Interactive Lab**:
