@@ -154,7 +154,7 @@ export const pmDocuments = {
         badge: "Spatial Computing PRD",
         status: "Design & Prototype Ready",
         title: "PRD: VisionNews — Spatial News Briefings for Apple Vision Pro",
-        subtitle: "Re-imagining executive news consumption through 3D audio spheres, gaze-anchored depth widgets, and zero-touch gesture interactions in visionOS.",
+        subtitle: "Delivering executive news briefings through gaze-anchored 3D depth widgets, spatial audio spheres, and zero-touch micro-pinch navigation in visionOS.",
         author: "Aadish Jain (Product Manager)",
         date: "Q4 2025",
         version: "v1.2",
@@ -296,7 +296,7 @@ export const pmDocuments = {
         meta: {
             "Domain": "Industrial Logistics & Fleet Spares",
             "Role": "Product Architecture & iOS Engineering Lead",
-            "Impact": "Over 14,000 orders processed seamlessly"
+            "Impact": "Over 14,000 orders processed with zero data discrepancy"
         },
         contentHtml: `
             <div class="doc-article">
@@ -315,7 +315,7 @@ export const pmDocuments = {
 
                 <h2>2. Product Interventions & Architectural Solutions</h2>
                 <ol>
-                    <li><strong>Visual & Barcode Quick-Match:</strong> Built an iOS camera scanner that utilizes high-contrast edge detection to recognize damaged serial stamps with 96% accuracy.</li>
+                    <li><strong>Visual &amp; Barcode Quick-Match:</strong> Built an iOS camera scanner using high-contrast edge detection to recognize damaged serial stamps with 96% accuracy.</li>
                     <li><strong>Real-time Stock Locking:</strong> Implemented atomic transaction locking on inventory reservations, eliminating phantom inventory over-promising.</li>
                     <li><strong>One-Tap Reorder Cartridges:</strong> Pre-bundled recurring maintenance kits (Filters, Lubricants, Gaskets) reducing requisition creation time from 14 minutes to 45 seconds.</li>
                 </ol>

@@ -1,0 +1,31 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 230 68" width="100%" height="100%" preserveAspectRatio="none">
+  <defs>
+    <linearGradient id="cBrandBody" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#ffffff" />
+      <stop offset="65%" stop-color="#f8faff" />
+      <stop offset="85%" stop-color="#e4f0fe" />
+      <stop offset="100%" stop-color="#cbe3fd" />
+    </linearGradient>
+    <linearGradient id="cBrandShade" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#c7dffc" stop-opacity="0" />
+      <stop offset="100%" stop-color="#aed0fa" stop-opacity="0.95" />
+    </linearGradient>
+  </defs>
+  <path d="M 32,34 
+    C 16,20 6,32 5,42 
+    C 0,54 12,63 28,63 
+    C 40,66 62,67 82,64 
+    C 106,68 144,68 170,64 
+    C 190,67 212,65 221,57 
+    C 229,48 227,36 217,28 
+    C 220,18 206,8 190,11 
+    C 174,2 148,2 130,9 
+    C 114,2 88,3 72,10 
+    C 56,3 38,10 32,22 
+    C 22,24 20,32 32,34 Z" 
+    fill="url(#cBrandBody)" stroke="#1e293b" stroke-width="2.4" stroke-linejoin="round" stroke-linecap="round" />
+  <path d="M 10,47 C 18,63 46,65 82,64 C 106,68 144,68 170,64 C 190,67 212,65 221,57 C 205,61 165,55 125,52 C 85,49 45,58 10,47 Z" fill="url(#cBrandShade)" />
+  <ellipse cx="80" cy="18" rx="30" ry="9" fill="#ffffff" opacity="0.9" />
+  <ellipse cx="154" cy="18" rx="32" ry="9" fill="#ffffff" opacity="0.9" />
+  <path d="M 54,23 C 66,16 84,18 94,24" fill="none" stroke="#a5c7f4" stroke-width="1.6" stroke-linecap="round" />
+</svg>

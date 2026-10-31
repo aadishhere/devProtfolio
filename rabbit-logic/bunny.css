@@ -1,299 +1,398 @@
 /* ==========================================================================
-   🐰 Standalone Bunny Companion Stylesheet ("rabbit-logic/bunny.css")
-   Pure Companion Vitals: Food, Oxygen, Health, and Revival Notice
+   🐰 Blinky Companion Stylesheet — Apple Health & WWDC Fluid Architecture
+   Crafted with Apple Human Interface Guidelines & Liquid Glass Materials
    ========================================================================== */
 
-/* 1. Full-Page WebGL Overlay Canvas */
+:root {
+    --bunny-font: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Plus Jakarta Sans", "Helvetica Neue", sans-serif;
+    --bunny-font-mono: "SF Mono", ui-monospace, "JetBrains Mono", Menlo, monospace;
+    
+    /* Apple Health System Colors */
+    --apple-health-green: #30d158;
+    --apple-health-cyan: #64d2ff;
+    --apple-health-blue: #0a84ff;
+    --apple-health-purple: #bf5af2;
+    --apple-health-amber: #ffd60a;
+    --apple-health-red: #ff453a;
+    
+    /* Light Theme Adaptive Tokens (Apple Clear Liquid Glass) */
+    --bunny-pill-bg: rgba(255, 255, 255, 0.85);
+    --bunny-pill-border: rgba(0, 0, 0, 0.08);
+    --bunny-pill-top-border: rgba(255, 255, 255, 0.95);
+    --bunny-pill-shadow: 0 12px 32px rgba(0, 0, 0, 0.08), 0 2px 6px rgba(0, 0, 0, 0.04);
+    --bunny-text-primary: #1d1d1f;
+    --bunny-text-secondary: #6e6e73;
+    --bunny-text-muted: #86868b;
+    --bunny-drawer-bg: rgba(255, 255, 255, 0.88);
+    --bunny-card-bg: rgba(0, 0, 0, 0.04);
+    --bunny-card-border: rgba(0, 0, 0, 0.06);
+    --bunny-accent: #0071e3;
+    --bunny-accent-glow: rgba(0, 113, 227, 0.15);
+}
+
+html.dark-mode {
+    /* Dark Theme Adaptive Tokens (Apple Regular Liquid Glass) */
+    --bunny-pill-bg: rgba(22, 24, 30, 0.82);
+    --bunny-pill-border: rgba(255, 255, 255, 0.12);
+    --bunny-pill-top-border: rgba(255, 255, 255, 0.22);
+    --bunny-pill-shadow: 0 20px 48px rgba(0, 0, 0, 0.55), 0 1px 2px rgba(0, 0, 0, 0.3);
+    --bunny-text-primary: #f5f5f7;
+    --bunny-text-secondary: #a1a1a6;
+    --bunny-text-muted: #6e6e73;
+    --bunny-drawer-bg: rgba(18, 20, 26, 0.90);
+    --bunny-card-bg: rgba(255, 255, 255, 0.04);
+    --bunny-card-border: rgba(255, 255, 255, 0.08);
+    --bunny-accent: #2997ff;
+    --bunny-accent-glow: rgba(41, 151, 255, 0.2);
+}
+
+/* 1. Full-Page WebGL Overlay Canvas (Behind Header at z-index 500) */
 #three-fullpage-rabbit-canvas {
     position: fixed;
     top: 0;
     left: 0;
     width: 100vw;
-    height: 100vh;
+    height: 100dvh;
     pointer-events: none;
-    z-index: 9999;
+    z-index: 500;
 }
 
-/* 2. Sleek Corner Capsule Pill Widget & Vitals Drawer */
+/* 2. Apple Live Activity Corner Capsule & Vitals Drawer */
 #bunny-corner-capsule {
     position: fixed;
-    bottom: 24px;
-    right: 24px;
+    bottom: max(22px, env(safe-area-inset-bottom, 22px));
+    right: max(22px, env(safe-area-inset-right, 22px));
     z-index: 10010;
     display: flex;
     flex-direction: column;
     align-items: flex-end;
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-    color: #f8fafc;
+    font-family: var(--bunny-font);
+    color: var(--bunny-text-primary);
     user-select: none;
-    transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+    -webkit-user-select: none;
+    -webkit-tap-highlight-color: transparent;
+    transition: transform 0.32s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-/* The Main Corner Pill (Collapsed View) */
+/* The Live Activity Capsule Pill */
 .bunny-capsule-pill {
     display: flex;
     align-items: center;
     gap: 10px;
-    background: rgba(13, 19, 33, 0.92);
-    border: 1px solid rgba(56, 189, 248, 0.3);
-    border-radius: 9999px;
+    background: var(--bunny-pill-bg);
+    border: 1px solid var(--bunny-pill-border);
+    border-top: 1px solid var(--bunny-pill-top-border);
+    border-radius: 980px;
     padding: 7px 14px;
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5), 0 0 15px rgba(56, 189, 248, 0.12);
-    backdrop-filter: blur(14px);
+    box-shadow: var(--bunny-pill-shadow);
+    backdrop-filter: blur(24px) saturate(190%);
+    -webkit-backdrop-filter: blur(24px) saturate(190%);
     cursor: pointer;
-    transition: transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+    touch-action: manipulation;
+    transition: transform 0.15s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.2s ease, box-shadow 0.2s ease;
 }
 
-.bunny-capsule-pill:hover {
-    transform: translateY(-2px);
-    border-color: rgba(56, 189, 248, 0.6);
-    box-shadow: 0 14px 35px rgba(0, 0, 0, 0.6), 0 0 20px rgba(56, 189, 248, 0.25);
+.bunny-capsule-pill:active {
+    transform: scale(0.97);
+}
+
+@media (hover: hover) and (pointer: fine) {
+    .bunny-capsule-pill:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 18px 40px rgba(0, 0, 0, 0.35);
+    }
+}
+
+/* Apple Health Concentric Breathing Beacon */
+.bunny-status-orb-container {
+    position: relative;
+    width: 12px;
+    height: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
 .bunny-status-orb {
-    width: 9px;
-    height: 9px;
+    width: 8px;
+    height: 8px;
     border-radius: 50%;
-    background: #10b981;
-    box-shadow: 0 0 8px #10b981;
+    background: var(--apple-health-green);
+    box-shadow: 0 0 10px rgba(48, 209, 88, 0.85);
     transition: background 0.3s ease, box-shadow 0.3s ease;
+    flex-shrink: 0;
+    position: relative;
+    z-index: 1;
 }
 
-.bunny-status-orb.sick {
-    background: #f97316;
-    box-shadow: 0 0 8px #f97316;
+.bunny-status-halo {
+    position: absolute;
+    inset: -3px;
+    border-radius: 50%;
+    background: rgba(48, 209, 88, 0.25);
+    animation: appleBeaconPulse 2.4s infinite ease-out;
 }
 
-.bunny-status-orb.choking {
-    background: #ef4444;
-    box-shadow: 0 0 12px #ef4444;
-    animation: orbPanic 0.4s infinite alternate;
+@keyframes appleBeaconPulse {
+    0% { transform: scale(0.85); opacity: 0.8; }
+    50% { transform: scale(1.4); opacity: 0; }
+    100% { transform: scale(0.85); opacity: 0; }
+}
+
+.bunny-status-orb.sleeping {
+    background: var(--apple-health-purple);
+    box-shadow: 0 0 10px rgba(191, 90, 242, 0.85);
+}
+
+.bunny-status-orb.resting {
+    background: var(--apple-health-amber);
+    box-shadow: 0 0 10px rgba(255, 214, 10, 0.85);
 }
 
 .bunny-status-orb.dead {
-    background: #ef4444;
-    box-shadow: 0 0 10px #ef4444;
-}
-
-@keyframes orbPanic {
-    0% { transform: scale(0.9); opacity: 0.6; }
-    100% { transform: scale(1.4); opacity: 1; }
+    background: var(--bunny-text-muted);
+    box-shadow: none;
 }
 
 .bunny-capsule-icon {
-    font-size: 16px;
+    font-size: 15px;
     line-height: 1;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
 }
 
 .bunny-capsule-info {
     display: flex;
     flex-direction: column;
-    min-width: 105px;
+    min-width: 110px;
 }
 
 .bunny-capsule-title {
-    font-size: 12px;
-    font-weight: 800;
-    color: #ffffff;
+    font-size: 12.5px;
+    font-weight: 700;
+    color: var(--bunny-text-primary);
     display: flex;
     align-items: center;
     gap: 6px;
+    letter-spacing: -0.015em;
 }
 
 .bunny-pill-badge {
-    font-size: 9px;
+    font-size: 9.5px;
     font-weight: 700;
-    padding: 1px 6px;
-    border-radius: 9999px;
-    background: rgba(16, 185, 129, 0.2);
-    color: #34d399;
-    border: 1px solid rgba(16, 185, 129, 0.4);
-    letter-spacing: 0.3px;
+    padding: 1px 7px;
+    border-radius: 980px;
+    background: rgba(48, 209, 88, 0.15);
+    color: var(--apple-health-green);
+    border: 1px solid rgba(48, 209, 88, 0.35);
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
 }
 
-.bunny-pill-badge.choking {
-    background: rgba(239, 68, 68, 0.25);
-    color: #f87171;
-    border-color: rgba(239, 68, 68, 0.6);
+.bunny-pill-badge.sleeping {
+    background: rgba(191, 90, 242, 0.15);
+    color: var(--apple-health-purple);
+    border-color: rgba(191, 90, 242, 0.35);
+}
+
+.bunny-pill-badge.resting {
+    background: rgba(255, 214, 10, 0.15);
+    color: var(--apple-health-amber);
+    border-color: rgba(255, 214, 10, 0.35);
 }
 
 .bunny-pill-badge.dead {
-    background: rgba(100, 116, 139, 0.3);
-    color: #cbd5e1;
-    border-color: rgba(148, 163, 184, 0.4);
+    background: rgba(142, 142, 147, 0.18);
+    color: var(--bunny-text-muted);
+    border-color: rgba(142, 142, 147, 0.3);
 }
 
 .bunny-capsule-subtitle {
-    font-size: 10px;
-    color: #94a3b8;
+    font-size: 10.5px;
+    color: var(--bunny-text-secondary);
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
+    font-variant-numeric: tabular-nums lining-nums;
+    font-family: var(--bunny-font);
+    margin-top: 1px;
 }
 
-.bunny-pill-feed-btn {
-    background: linear-gradient(135deg, #f97316, #ea580c);
+/* Quick Wake / Feed Pill Chip */
+.bunny-pill-wake-btn {
+    background: var(--apple-health-purple);
     color: #ffffff;
     border: none;
-    border-radius: 9999px;
-    padding: 4px 10px;
+    border-radius: 980px;
+    padding: 3px 9px;
     font-size: 11px;
     font-weight: 700;
     cursor: pointer;
-    display: flex;
+    display: inline-flex;
     align-items: center;
     gap: 4px;
-    transition: transform 0.15s ease, filter 0.15s ease;
+    touch-action: manipulation;
+    transition: transform 0.14s ease-out;
 }
 
-.bunny-pill-feed-btn:hover {
-    transform: scale(1.06);
-    filter: brightness(1.1);
-}
-
-.bunny-pill-revive-btn {
-    background: linear-gradient(135deg, #ef4444, #dc2626);
-    color: #ffffff;
-    border: none;
-    border-radius: 9999px;
-    padding: 4px 10px;
-    font-size: 11px;
-    font-weight: 800;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    gap: 4px;
-    animation: reviveGlow 1.2s infinite alternate;
-}
-
-@keyframes reviveGlow {
-    0% { box-shadow: 0 0 6px rgba(239, 68, 68, 0.4); }
-    100% { box-shadow: 0 0 14px rgba(239, 68, 68, 0.85); }
+.bunny-pill-wake-btn:active {
+    transform: scale(0.95);
 }
 
 .bunny-capsule-chevron {
     font-size: 11px;
-    color: #64748b;
-    transition: transform 0.3s ease;
+    color: var(--bunny-text-muted);
+    transition: transform 0.32s cubic-bezier(0.16, 1, 0.3, 1);
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
 #bunny-corner-capsule.expanded .bunny-capsule-chevron {
     transform: rotate(180deg);
 }
 
-/* 3. The Expandable Vitals Drawer */
+/* 3. The Apple Watch Vitals Card (Expanded View) */
 .bunny-drawer {
     display: none;
-    width: 330px;
+    width: 335px;
     margin-bottom: 12px;
-    background: rgba(11, 17, 30, 0.96);
-    border: 1px solid rgba(56, 189, 248, 0.28);
-    border-radius: 20px;
-    padding: 18px;
-    box-shadow: 0 20px 45px rgba(0, 0, 0, 0.65), 0 0 25px rgba(56, 189, 248, 0.15);
-    backdrop-filter: blur(18px);
-    animation: drawerSlideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    background: var(--bunny-drawer-bg);
+    border: 1px solid var(--bunny-pill-border);
+    border-top: 1px solid var(--bunny-pill-top-border);
+    border-radius: 26px;
+    padding: 18px 20px;
+    box-shadow: 0 24px 60px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.2);
+    backdrop-filter: blur(28px) saturate(190%);
+    -webkit-backdrop-filter: blur(28px) saturate(190%);
+    transform-origin: bottom right;
 }
 
 #bunny-corner-capsule.expanded .bunny-drawer {
     display: block;
+    animation: appleDrawerOpen 0.32s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 
-@keyframes drawerSlideUp {
-    0% { opacity: 0; transform: translateY(14px) scale(0.96); }
-    100% { opacity: 1; transform: translateY(0) scale(1); }
+@keyframes appleDrawerOpen {
+    0% {
+        opacity: 0;
+        transform: translateY(12px) scale(0.96);
+    }
+    100% {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
 }
 
 .bunny-drawer-header {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding-bottom: 10px;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-    margin-bottom: 12px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid var(--bunny-card-border);
+    margin-bottom: 14px;
+}
+
+.bunny-drawer-title-group {
+    display: flex;
+    align-items: center;
+    gap: 8px;
 }
 
 .bunny-drawer-title {
-    font-size: 13px;
-    font-weight: 800;
-    color: #38bdf8;
+    font-size: 13.5px;
+    font-weight: 700;
+    color: var(--bunny-text-primary);
     display: flex;
     align-items: center;
     gap: 6px;
-    letter-spacing: 0.3px;
+    letter-spacing: -0.015em;
+}
+
+.bunny-drawer-vitals-badge {
+    font-size: 9px;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    padding: 2px 7px;
+    border-radius: 980px;
+    background: rgba(48, 209, 88, 0.15);
+    color: var(--apple-health-green);
+    border: 1px solid rgba(48, 209, 88, 0.35);
+    text-transform: uppercase;
+}
+
+.bunny-drawer-controls {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.bunny-icon-btn {
+    background: var(--bunny-card-bg);
+    border: 1px solid var(--bunny-card-border);
+    color: var(--bunny-text-secondary);
+    cursor: pointer;
+    font-size: 12px;
+    width: 28px;
+    height: 28px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 8px;
+    touch-action: manipulation;
+    transition: background 0.15s ease, color 0.15s ease, transform 0.12s ease-out;
+}
+
+.bunny-icon-btn:active {
+    transform: scale(0.94);
+}
+
+@media (hover: hover) and (pointer: fine) {
+    .bunny-icon-btn:hover {
+        color: var(--bunny-text-primary);
+        background: rgba(255, 255, 255, 0.1);
+    }
+}
+
+.bunny-icon-btn.active {
+    color: var(--bunny-accent);
+    border-color: var(--bunny-accent);
 }
 
 .bunny-drawer-close {
-    background: transparent;
-    border: none;
-    color: #64748b;
+    background: var(--bunny-card-bg);
+    border: 1px solid var(--bunny-card-border);
+    color: var(--bunny-text-secondary);
     cursor: pointer;
-    font-size: 14px;
-    padding: 2px 6px;
-    border-radius: 6px;
-}
-
-.bunny-drawer-close:hover {
-    color: #ffffff;
-    background: rgba(255, 255, 255, 0.08);
-}
-
-/* Clean 2-Column Vitals Grid */
-.bunny-stats-grid {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 10px;
-    margin-bottom: 14px;
-}
-
-.bunny-stat-card {
-    background: rgba(255, 255, 255, 0.03);
-    border: 1px solid rgba(255, 255, 255, 0.06);
-    border-radius: 12px;
-    padding: 9px 8px;
-    display: flex;
-    flex-direction: column;
-}
-
-.bunny-stat-label {
-    font-size: 9px;
-    font-weight: 700;
-    color: #64748b;
-    text-transform: uppercase;
-    display: flex;
+    font-size: 12px;
+    width: 28px;
+    height: 28px;
+    display: inline-flex;
     align-items: center;
-    gap: 3px;
-    margin-bottom: 4px;
+    justify-content: center;
+    border-radius: 8px;
+    touch-action: manipulation;
+    transition: background 0.15s ease, color 0.15s ease;
 }
 
-.bunny-stat-val {
-    font-size: 15px;
-    font-weight: 800;
-    color: #f1f5f9;
-}
-
-.bunny-stat-meta {
-    font-size: 9px;
-    color: #94a3b8;
-    margin-top: 2px;
-}
-
-/* EKG Mini Wave in Drawer */
+/* Apple ECG Waveform Row */
 .bunny-ekg-row {
     background: rgba(0, 0, 0, 0.45);
-    border-radius: 10px;
-    border: 1px solid rgba(255, 255, 255, 0.05);
-    padding: 6px 10px;
+    border-radius: 14px;
+    border: 1px solid var(--bunny-card-border);
+    padding: 8px 12px;
     display: flex;
     align-items: center;
-    gap: 10px;
-    margin-bottom: 14px;
+    gap: 12px;
+    margin-bottom: 12px;
 }
 
 #capsule-ekg-canvas {
     width: 140px;
-    height: 28px;
+    height: 32px;
     display: block;
+    border-radius: 6px;
 }
 
 .bunny-ekg-meta {
@@ -303,123 +402,220 @@
     align-items: flex-end;
 }
 
-.bunny-ekg-spo2 {
-    font-size: 15px;
+.bunny-ekg-bpm-readout {
+    font-size: 17px;
     font-weight: 800;
-    color: #38bdf8;
-    font-family: monospace;
+    color: var(--apple-health-green);
+    font-family: var(--bunny-font);
+    font-variant-numeric: tabular-nums lining-nums;
+    line-height: 1.1;
+    display: flex;
+    align-items: baseline;
+    gap: 3px;
 }
 
-.bunny-ekg-bpm {
+.bunny-ekg-bpm-readout span {
     font-size: 10px;
-    color: #94a3b8;
-    font-family: monospace;
+    font-weight: 600;
+    color: var(--bunny-text-muted);
 }
 
-/* Drawer Action Buttons & Revival Notice */
-.bunny-drawer-actions {
+.bunny-ekg-rhythm {
+    font-size: 9.5px;
+    color: var(--bunny-text-muted);
+    font-family: var(--bunny-font);
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    margin-top: 2px;
+}
+
+/* Dual Apple Health Metric Cards */
+.bunny-stats-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+    margin-bottom: 14px;
+}
+
+.bunny-stat-card {
+    background: var(--bunny-card-bg);
+    border: 1px solid var(--bunny-card-border);
+    border-radius: 14px;
+    padding: 10px 12px;
     display: flex;
     flex-direction: column;
-    gap: 8px;
 }
 
-.bunny-action-btn {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 8px;
-    padding: 9px 14px;
-    border-radius: 10px;
-    font-size: 12px;
+.bunny-stat-label {
+    font-size: 9.5px;
     font-weight: 700;
-    cursor: pointer;
-    border: none;
-    text-decoration: none;
-    transition: transform 0.15s ease, filter 0.15s ease;
-}
-
-.bunny-action-btn:hover {
-    transform: translateY(-1px);
-    filter: brightness(1.1);
-}
-
-.bunny-btn-feed-drawer {
-    background: linear-gradient(135deg, #f97316, #ea580c);
-    color: #ffffff;
-}
-
-/* Revival Emergency Notice Box */
-.bunny-death-notice-box {
-    background: rgba(239, 68, 68, 0.12);
-    border: 1px solid rgba(239, 68, 68, 0.35);
-    border-radius: 12px;
-    padding: 12px;
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-}
-
-.bunny-death-notice-title {
-    font-size: 12px;
-    font-weight: 800;
-    color: #f87171;
+    color: var(--bunny-text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
     display: flex;
     align-items: center;
     gap: 5px;
+    margin-bottom: 4px;
 }
 
-.bunny-death-notice-meta {
-    font-size: 10px;
-    color: #cbd5e1;
-    font-family: monospace;
+.bunny-stat-val {
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--bunny-text-primary);
+    font-variant-numeric: tabular-nums lining-nums;
+    font-family: var(--bunny-font);
+    line-height: 1.2;
 }
 
-.bunny-death-notice-desc {
+.bunny-stat-meta {
+    font-size: 9.5px;
+    color: var(--bunny-text-secondary);
+    margin-top: 3px;
+}
+
+/* Drawer Action Buttons */
+.bunny-drawer-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.bunny-apple-action-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 11px 18px;
+    border-radius: 980px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    border: none;
+    text-decoration: none;
+    touch-action: manipulation;
+    transition: transform 0.15s cubic-bezier(0.16, 1, 0.3, 1), background-color 0.15s ease, box-shadow 0.15s ease;
+    
+    /* Apple High-Contrast Filled Pill */
+    background: #ffffff;
+    color: #000000;
+    box-shadow: 0 4px 14px rgba(255, 255, 255, 0.15);
+}
+
+html:not(.dark-mode) .bunny-apple-action-btn {
+    background: #000000;
+    color: #ffffff;
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.12);
+}
+
+.bunny-apple-action-btn:active {
+    transform: scale(0.97);
+}
+
+@media (hover: hover) and (pointer: fine) {
+    .bunny-apple-action-btn:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 6px 18px rgba(255, 255, 255, 0.25);
+    }
+    html:not(.dark-mode) .bunny-apple-action-btn:hover {
+        box-shadow: 0 6px 18px rgba(0, 0, 0, 0.2);
+    }
+}
+
+/* Apple Rest & Recovery Card (When Sleepy / Fainted) */
+.bunny-recovery-card {
+    background: rgba(191, 90, 242, 0.08);
+    border: 1px solid rgba(191, 90, 242, 0.25);
+    border-radius: 14px;
+    padding: 12px 14px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.bunny-recovery-title {
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--apple-health-purple);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.bunny-recovery-desc {
     font-size: 11px;
-    color: #94a3b8;
-    line-height: 1.35;
+    color: var(--bunny-text-secondary);
+    line-height: 1.45;
 }
 
-.bunny-btn-whatsapp-drawer {
-    background: #25d366;
-    color: #052e16;
+.bunny-btn-wake-action {
+    background: var(--apple-health-purple);
+    color: #ffffff;
+    border: none;
+    border-radius: 980px;
+    padding: 8px 14px;
+    font-size: 12px;
+    font-weight: 700;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    transition: transform 0.14s ease-out;
 }
 
-.bunny-btn-email-drawer {
-    background: #38bdf8;
-    color: #082f49;
+.bunny-btn-wake-action:active {
+    transform: scale(0.97);
 }
 
-.bunny-btn-admin-revive {
-    background: rgba(16, 185, 129, 0.15);
-    border: 1px dashed #10b981;
-    color: #10b981;
-    font-size: 11px;
-}
-
-/* 4. Floating Hearts & Reactions */
-.rabbit-floating-heart {
+/* 4. Floating Particles (Hearts & Carrots) */
+.rabbit-floating-heart,
+.rabbit-floating-carrot {
     position: fixed;
     z-index: 10020;
     font-size: 24px;
     pointer-events: none;
-    animation: bunnyFloatUp 1.2s ease-out forwards;
+    animation: appleParticleRise 1.1s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 
-@keyframes bunnyFloatUp {
-    0% { opacity: 1; transform: translateY(0) scale(0.8); }
-    50% { opacity: 1; transform: translateY(-30px) scale(1.15); }
-    100% { opacity: 0; transform: translateY(-60px) scale(1); }
+@keyframes appleParticleRise {
+    0% {
+        opacity: 1;
+        transform: translateY(0) scale(0.85);
+    }
+    60% {
+        opacity: 1;
+        transform: translateY(-24px) scale(1.1);
+    }
+    100% {
+        opacity: 0;
+        transform: translateY(-48px) scale(0.95);
+    }
 }
 
-/* Mobile Responsiveness */
+/* 5. Accessibility & Reduced Motion */
+@media (prefers-reduced-motion: reduce) {
+    .bunny-capsule-pill,
+    .bunny-apple-action-btn,
+    .bunny-icon-btn,
+    .rabbit-floating-heart,
+    .rabbit-floating-carrot,
+    .bunny-status-halo {
+        transition-duration: 0.05s !important;
+        animation: none !important;
+    }
+}
+
+/* 6. Mobile Safe Areas */
 @media (max-width: 600px) {
     #bunny-corner-capsule {
-        bottom: 16px;
-        right: 16px;
+        bottom: max(14px, env(safe-area-inset-bottom, 14px));
+        right: max(14px, env(safe-area-inset-right, 14px));
     }
     .bunny-drawer {
-        width: calc(100vw - 32px);
+        width: min(320px, calc(100vw - 28px));
+        padding: 16px;
+    }
+    .bunny-capsule-pill {
+        padding: 6px 12px;
     }
 }
-

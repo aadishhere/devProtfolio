@@ -1,0 +1,5 @@
+<svg viewBox="0 0 90 45" width="100%" height="100%" class="anime-cloudlet-svg">
+  <path d="M 18,24 C 8,14 4,24 3,30 C 0,38 8,43 18,43 C 26,45 44,45 58,43 C 70,45 84,43 88,37 C 92,30 89,23 82,18 C 83,12 74,5 64,8 C 55,2 40,2 32,7 C 24,2 16,7 14,14 C 8,16 6,22 18,24 Z" 
+    fill="#ffffff" stroke="#1e293b" stroke-width="1.8" stroke-linejoin="round" stroke-linecap="round" />
+  <ellipse cx="46" cy="15" rx="16" ry="6" fill="#f0f7ff" />
+</svg>

@@ -89,12 +89,29 @@ export class BunnyCompanion {
             time: performance.now()
         };
 
-        // Draggable & Scruff Neck State
+        // Draggable, Scruff Neck & Dynamic Physics State
         this.isDragging = false;
         this.dragOffset = { x: 0, y: 0 };
-        this.dangleSway = 0;
-        this.targetDangleSway = 0;
+        this.dangleAngle = 0;
+        this.dangleVel = 0;
+        this.dangleAccel = 0;
+        this.dragVelocityX = 0;
         this.lastDragEndTime = 0;
+
+        // Ground Contact Shadow & Landing Impact Spring
+        this.shadowMesh = null;
+        this.landingSquash = 0;
+        this.landingSquashVel = 0;
+
+        // Mobile Touch Scroll Hysteresis
+        this.touchStartX = 0;
+        this.touchStartY = 0;
+        this.isTouchPrimed = false;
+        this.primedHit = null;
+
+        // Energy Saver & Reduced Motion
+        this.isTabHidden = false;
+        this.prefersReducedMotion = window.matchMedia ? window.matchMedia('(prefers-reduced-motion: reduce)').matches : false;
 
         // Raycaster & Sensitive Parts System (Easy holding & tactile touch feedback)
         this.raycaster = new THREE.Raycaster();
@@ -215,6 +232,36 @@ export class BunnyCompanion {
         this.bunnyRoot = new THREE.Group();
         this.bunnyRoot.position.set(0, 0, 0);
         this.scene.add(this.bunnyRoot);
+        this.initShadow();
+    }
+
+    initShadow() {
+        if (!this.bunnyRoot) return;
+        const c = document.createElement('canvas');
+        c.width = 128;
+        c.height = 128;
+        const ctx = c.getContext('2d');
+        const grad = ctx.createRadialGradient(64, 64, 0, 64, 64, 60);
+        grad.addColorStop(0, 'rgba(0, 0, 0, 0.52)');
+        grad.addColorStop(0.35, 'rgba(0, 0, 0, 0.28)');
+        grad.addColorStop(0.7, 'rgba(0, 0, 0, 0.08)');
+        grad.addColorStop(1, 'rgba(0, 0, 0, 0)');
+        ctx.fillStyle = grad;
+        ctx.fillRect(0, 0, 128, 128);
+
+        const texture = new THREE.CanvasTexture(c);
+        const geo = new THREE.PlaneGeometry(0.85, 0.85);
+        const mat = new THREE.MeshBasicMaterial({
+            map: texture,
+            transparent: true,
+            opacity: 0.42,
+            depthWrite: false
+        });
+        this.shadowMesh = new THREE.Mesh(geo, mat);
+        this.shadowMesh.rotation.x = -Math.PI / 2;
+        this.shadowMesh.position.y = -0.34;
+        this.shadowMesh.raycast = () => {}; // Never intercept pointer raycasts
+        this.bunnyRoot.add(this.shadowMesh);
     }
 
     screenToWorld(screenX, screenY) {
@@ -600,83 +647,89 @@ export class BunnyCompanion {
         }
     }
 
-    // --- UI: Sleek Corner Capsule Pill Widget & Pure Vitals Drawer ---
+    // --- UI: Apple Live Activity Capsule & Apple Watch Vitals Card ---
     initCornerCapsule() {
         if (document.getElementById('bunny-corner-capsule')) return;
 
         const capsule = document.createElement('div');
         capsule.id = 'bunny-corner-capsule';
 
-        const waText = encodeURIComponent("Hey Aadish, I accidentally suffocated your website bunny Blinky 😭 Can you please revive him?");
-        const mailSubject = encodeURIComponent("Blinky is dead! Please revive him");
-        const mailBody = encodeURIComponent("Hey Aadish,\n\nI suffocated Blinky on your site and he is dead.\n\nPlease revive him with your admin master code!\n\nBest,");
-
         capsule.innerHTML = `
-            <!-- The Expandable Vitals Drawer -->
+            <!-- The Apple Watch Vitals Card (Expanded View) -->
             <div class="bunny-drawer" id="bunny-drawer">
                 <div class="bunny-drawer-header">
-                    <div class="bunny-drawer-title">
-                        <span>🐰 Blinky's Vitals</span>
+                    <div class="bunny-drawer-title-group">
+                        <div class="bunny-drawer-title">
+                            <span>🐰 Blinky Vitals</span>
+                        </div>
+                        <span id="drawer-vitals-badge" class="bunny-drawer-vitals-badge">TYPICAL RANGE</span>
                     </div>
-                    <button class="bunny-drawer-close" id="btn-close-drawer" title="Close drawer">✕</button>
+                    <div class="bunny-drawer-controls">
+                        <button class="bunny-icon-btn" id="btn-toggle-sound" title="Toggle Beep Audio">🔊</button>
+                        <button class="bunny-icon-btn" id="btn-toggle-sleep" title="Snooze / Wake Blinky">💤</button>
+                        <button class="bunny-drawer-close" id="btn-close-drawer" title="Close drawer">✕</button>
+                    </div>
                 </div>
 
-                <!-- Pure Vitals 2-Column Grid -->
+                <!-- Apple ECG Oscilloscope Waveform -->
+                <div class="bunny-ekg-row">
+                    <canvas id="capsule-ekg-canvas" width="140" height="32"></canvas>
+                    <div class="bunny-ekg-meta">
+                        <div class="bunny-ekg-bpm-readout" id="drawer-bpm-readout">
+                            <span id="drawer-bpm-val">140</span>
+                            <span>BPM</span>
+                        </div>
+                        <div class="bunny-ekg-rhythm" id="drawer-rhythm-text">SINUS RHYTHM</div>
+                    </div>
+                </div>
+
+                <!-- Dual Apple Health Metric Cards -->
                 <div class="bunny-stats-grid">
                     <div class="bunny-stat-card">
-                        <div class="bunny-stat-label">🫁 Oxygen</div>
-                        <div class="bunny-stat-val" id="drawer-spo2-val">100% SpO2</div>
-                        <div class="bunny-stat-meta" id="drawer-bpm-val">140 bpm</div>
+                        <div class="bunny-stat-label">❤️ Resting Heart Rate</div>
+                        <div class="bunny-stat-val" id="drawer-health-val">140 BPM</div>
+                        <div class="bunny-stat-meta" id="drawer-health-meta">In typical range</div>
                     </div>
                     <div class="bunny-stat-card">
-                        <div class="bunny-stat-label">❤️ Health</div>
-                        <div class="bunny-stat-val" id="drawer-health-val">100%</div>
-                        <div class="bunny-stat-meta" id="drawer-health-meta">Healthy</div>
+                        <div class="bunny-stat-label">🫁 Blood Oxygen</div>
+                        <div class="bunny-stat-val" id="drawer-spo2-val">99% SpO₂</div>
+                        <div class="bunny-stat-meta" id="drawer-spo2-meta">Optimal oxygenation</div>
                     </div>
                 </div>
 
-                <!-- Clinical EKG Waveform in Drawer -->
-                <div class="bunny-ekg-row">
-                    <canvas id="capsule-ekg-canvas" width="140" height="28"></canvas>
-                    <div class="bunny-ekg-meta">
-                        <div class="bunny-ekg-spo2" id="drawer-spo2-text">100%</div>
-                        <div class="bunny-ekg-bpm">PULSE LIVE</div>
-                    </div>
-                </div>
-
-                <!-- Actions / Revival Notice inside Drawer -->
+                <!-- Drawer Actions: Apple High-Contrast Pill -->
                 <div class="bunny-drawer-actions">
-                    <!-- Emergency Revival Notice (Shown strictly when dead) -->
-                    <div id="drawer-death-actions" class="bunny-death-notice-box" style="display: none;">
-                        <div class="bunny-death-notice-title">⚠️ Blinky Suffocated & Died</div>
-                        <div class="bunny-death-notice-meta" id="drawer-death-time">Dead since: Just now</div>
-                        <div class="bunny-death-notice-desc">Someone held Blinky's neck until oxygen reached 0%. Notify Aadish to revive him, or use Admin Revive below.</div>
-                        <a href="https://api.whatsapp.com/send?text=${waText}" target="_blank" class="bunny-action-btn bunny-btn-whatsapp-drawer">
-                            <span>💬 Notify Aadish on WhatsApp</span>
-                        </a>
-                        <a href="mailto:${this.options.adminEmail}?subject=${mailSubject}&body=${mailBody}" class="bunny-action-btn bunny-btn-email-drawer">
-                            <span>✉️ Email Aadish to Revive Pet</span>
-                        </a>
-                        <button class="bunny-action-btn bunny-btn-admin-revive" id="btn-drawer-admin-revive">
-                            <span>⚡ I am Aadish (Admin Revive)</span>
+                    <button class="bunny-apple-action-btn" id="btn-drawer-feed">
+                        <span>🥕 Treat with Fresh Carrot</span>
+                    </button>
+
+                    <!-- Rest & Recovery State Notice Box -->
+                    <div id="drawer-death-actions" class="bunny-recovery-card" style="display: none;">
+                        <div class="bunny-recovery-title">💤 Restorative Power Nap</div>
+                        <div class="bunny-recovery-desc">Blinky was held a bit too long and is resting peacefully. Tap him on the desk or offer a carrot to wake him.</div>
+                        <button class="bunny-btn-wake-action" id="btn-drawer-revive-carrot">
+                            <span>🥕 Wake Blinky</span>
                         </button>
                     </div>
                 </div>
             </div>
 
-            <!-- The Corner Pill (Always Visible) -->
+            <!-- The Corner Capsule Pill (Apple Live Activity) -->
             <div class="bunny-capsule-pill" id="bunny-pill">
-                <div class="bunny-status-orb" id="bunny-pill-orb"></div>
+                <div class="bunny-status-orb-container">
+                    <div class="bunny-status-halo" id="bunny-status-halo"></div>
+                    <div class="bunny-status-orb" id="bunny-pill-orb"></div>
+                </div>
                 <div class="bunny-capsule-icon">🐰</div>
                 <div class="bunny-capsule-info">
                     <div class="bunny-capsule-title">
                         <span>Blinky</span>
-                        <span id="bunny-pill-status" class="bunny-pill-badge">Healthy</span>
+                        <span id="bunny-pill-status" class="bunny-pill-badge">Optimal</span>
                     </div>
-                    <div class="bunny-capsule-subtitle" id="bunny-pill-stats">🫁 100% O₂ • 140 bpm</div>
+                    <div class="bunny-capsule-subtitle" id="bunny-pill-stats">99% O₂ • 140 BPM</div>
                 </div>
-                <button class="bunny-pill-revive-btn" id="btn-pill-revive" style="display: none;" title="Revive Blinky">
-                    <span>⚡ Revive</span>
+                <button class="bunny-pill-wake-btn" id="btn-pill-wake" style="display: none;" title="Wake Blinky">
+                    <span>☀️ Wake</span>
                 </button>
                 <div class="bunny-capsule-chevron">▲</div>
             </div>
@@ -690,7 +743,7 @@ export class BunnyCompanion {
         // Toggle drawer
         const pill = document.getElementById('bunny-pill');
         pill.addEventListener('click', (e) => {
-            if (e.target.closest('#btn-pill-revive')) return;
+            if (e.target.closest('#btn-pill-wake')) return;
             capsule.classList.toggle('expanded');
         });
 
@@ -698,14 +751,49 @@ export class BunnyCompanion {
             capsule.classList.remove('expanded');
         });
 
-        // Revive buttons
-        const handleRevive = (e) => {
+        // Quick Wake from Pill
+        document.getElementById('btn-pill-wake').addEventListener('click', (e) => {
             e.stopPropagation();
-            this.stateManager.adminRevive();
-            capsule.classList.remove('expanded');
-        };
-        document.getElementById('btn-pill-revive').addEventListener('click', handleRevive);
-        document.getElementById('btn-drawer-admin-revive').addEventListener('click', handleRevive);
+            this.reviveBunny();
+            this.spawnFloatingHeart('☀️');
+        });
+
+        // Sound Toggle
+        const btnSound = document.getElementById('btn-toggle-sound');
+        btnSound.addEventListener('click', (e) => {
+            e.stopPropagation();
+            const isMuted = this.stateManager.toggleMute();
+            btnSound.textContent = isMuted ? '🔇' : '🔊';
+            btnSound.title = isMuted ? 'Unmute Audio' : 'Mute Audio';
+        });
+
+        // Sleep / Snooze Toggle
+        const btnSleep = document.getElementById('btn-toggle-sleep');
+        btnSleep.addEventListener('click', (e) => {
+            e.stopPropagation();
+            const isSleeping = this.stateManager.toggleSleep();
+            btnSleep.textContent = isSleeping ? '☀️' : '💤';
+            btnSleep.title = isSleeping ? 'Wake Blinky' : 'Snooze Blinky';
+            btnSleep.classList.toggle('active', isSleeping);
+            if (isSleeping) {
+                this.spawnFloatingHeart('💤');
+            } else {
+                this.reviveBunny();
+                this.spawnFloatingHeart('☀️');
+            }
+        });
+
+        // Feed Carrot in Drawer
+        document.getElementById('btn-drawer-feed').addEventListener('click', (e) => {
+            e.stopPropagation();
+            this.feedCarrot();
+        });
+
+        // Wake / Revive in Drawer
+        document.getElementById('btn-drawer-revive-carrot').addEventListener('click', (e) => {
+            e.stopPropagation();
+            this.feedCarrot();
+        });
     }
 
     openCapsuleDrawer() {
@@ -721,68 +809,108 @@ export class BunnyCompanion {
         const statusBadge = document.getElementById('bunny-pill-status');
         const statsPill = document.getElementById('bunny-pill-stats');
         const spo2El = document.getElementById('drawer-spo2-val');
-        const spo2Text = document.getElementById('drawer-spo2-text');
         const bpmEl = document.getElementById('drawer-bpm-val');
         const healthEl = document.getElementById('drawer-health-val');
         const healthMeta = document.getElementById('drawer-health-meta');
+        const vitalsBadge = document.getElementById('drawer-vitals-badge');
+        const rhythmText = document.getElementById('drawer-rhythm-text');
+        const deathBox = document.getElementById('drawer-death-actions');
+        const feedBtn = document.getElementById('btn-drawer-feed');
+        const wakeBtn = document.getElementById('btn-pill-wake');
 
         const spo2Rounded = Math.round(spo2);
-        if (spo2El) spo2El.textContent = `${spo2Rounded}% SpO2`;
-        if (spo2Text) spo2Text.textContent = `${spo2Rounded}%`;
-        if (bpmEl) bpmEl.textContent = `${Math.round(bpm)} bpm`;
+        const bpmRounded = Math.round(bpm);
+
+        if (spo2El) spo2El.textContent = `${spo2Rounded}% SpO₂`;
+        if (bpmEl) bpmEl.textContent = `${bpmRounded}`;
 
         if (orb) {
             orb.className = 'bunny-status-orb';
-            if (st.isDead) orb.classList.add('dead');
-            else if (isChoking) orb.classList.add('choking');
-            else if (st.isSick) orb.classList.add('sick');
+            if (st.isDead) orb.classList.add('resting');
+            else if (st.isSleeping) orb.classList.add('sleeping');
+            else if (isChoking) orb.classList.add('resting');
+            else if (st.isSick) orb.classList.add('resting');
         }
 
-        const deathBox = document.getElementById('drawer-death-actions');
-        const reviveBtn = document.getElementById('btn-pill-revive');
-
-        if (st.isDead) {
+        if (st.isDead || this.state === 'fainted') {
             if (statusBadge) {
-                statusBadge.textContent = 'Dead 💀';
-                statusBadge.className = 'bunny-pill-badge dead';
+                statusBadge.textContent = 'Power Nap 💤';
+                statusBadge.className = 'bunny-pill-badge resting';
             }
             if (statsPill) {
-                statsPill.textContent = 'FLATLINE • O₂ 0%';
+                statsPill.textContent = 'Resting • Tap to wake';
             }
-            if (healthEl) healthEl.textContent = '0%';
-            if (healthMeta) healthMeta.textContent = 'Suffocated';
-            if (deathBox) deathBox.style.display = 'block';
-            if (reviveBtn) reviveBtn.style.display = 'inline-flex';
-
-            const timeEl = document.getElementById('drawer-death-time');
-            if (timeEl && st.deadSince) {
-                const elapsedMin = Math.floor((Date.now() - st.deadSince) / 60000);
-                timeEl.textContent = `Dead since: ${elapsedMin < 1 ? 'Just now' : elapsedMin + 'm ago'}`;
+            if (healthEl) healthEl.textContent = '40 BPM';
+            if (healthMeta) healthMeta.textContent = 'Restorative sleep';
+            if (vitalsBadge) {
+                vitalsBadge.textContent = 'RESTING';
+                vitalsBadge.style.color = '#ffd60a';
+                vitalsBadge.style.borderColor = 'rgba(255, 214, 10, 0.4)';
+                vitalsBadge.style.background = 'rgba(255, 214, 10, 0.12)';
             }
+            if (rhythmText) rhythmText.textContent = 'DEEP REST';
+            if (deathBox) deathBox.style.display = 'flex';
+            if (feedBtn) feedBtn.style.display = 'none';
+            if (wakeBtn) wakeBtn.style.display = 'inline-flex';
+        } else if (st.isSleeping) {
+            if (statusBadge) {
+                statusBadge.textContent = 'Snoozing 💤';
+                statusBadge.className = 'bunny-pill-badge sleeping';
+            }
+            if (statsPill) {
+                statsPill.textContent = `💤 Snoozing • ${bpmRounded} BPM`;
+            }
+            if (healthEl) healthEl.textContent = `${bpmRounded} BPM`;
+            if (healthMeta) healthMeta.textContent = 'Peaceful snooze';
+            if (vitalsBadge) {
+                vitalsBadge.textContent = 'SNOOZING';
+                vitalsBadge.style.color = '#bf5af2';
+                vitalsBadge.style.borderColor = 'rgba(191, 90, 242, 0.4)';
+                vitalsBadge.style.background = 'rgba(191, 90, 242, 0.12)';
+            }
+            if (rhythmText) rhythmText.textContent = 'RESTING RHYTHM';
+            if (deathBox) deathBox.style.display = 'none';
+            if (feedBtn) feedBtn.style.display = 'inline-flex';
+            if (wakeBtn) wakeBtn.style.display = 'inline-flex';
         } else {
             if (deathBox) deathBox.style.display = 'none';
-            if (reviveBtn) reviveBtn.style.display = 'none';
+            if (feedBtn) feedBtn.style.display = 'inline-flex';
+            if (wakeBtn) wakeBtn.style.display = 'none';
 
             if (isChoking) {
                 if (statusBadge) {
-                    statusBadge.textContent = 'Choking! ⚠️';
-                    statusBadge.className = 'bunny-pill-badge choking';
+                    statusBadge.textContent = 'Fatigued 🥱';
+                    statusBadge.className = 'bunny-pill-badge resting';
                 }
                 if (statsPill) {
-                    statsPill.textContent = `🫁 ${spo2Rounded}% O₂ • ${Math.round(bpm)} bpm`;
+                    statsPill.textContent = `${spo2Rounded}% O₂ • ${bpmRounded} BPM`;
                 }
-                if (healthEl) healthEl.textContent = `${Math.round(spo2)}%`;
-                if (healthMeta) healthMeta.textContent = 'Suffocating!';
+                if (healthEl) healthEl.textContent = `${bpmRounded} BPM`;
+                if (healthMeta) healthMeta.textContent = 'Needs release';
+                if (vitalsBadge) {
+                    vitalsBadge.textContent = 'ELEVATED';
+                    vitalsBadge.style.color = '#ffd60a';
+                    vitalsBadge.style.borderColor = 'rgba(255, 214, 10, 0.4)';
+                    vitalsBadge.style.background = 'rgba(255, 214, 10, 0.12)';
+                }
+                if (rhythmText) rhythmText.textContent = 'EXERTION';
             } else {
                 if (statusBadge) {
-                    statusBadge.textContent = st.isSick ? 'Sick 🤒' : 'Healthy ✨';
-                    statusBadge.className = st.isSick ? 'bunny-pill-badge sick' : 'bunny-pill-badge';
+                    statusBadge.textContent = st.isSick ? 'Low Energy 💫' : 'Optimal ✨';
+                    statusBadge.className = st.isSick ? 'bunny-pill-badge resting' : 'bunny-pill-badge';
                 }
                 if (statsPill) {
-                    statsPill.textContent = `🫁 ${spo2Rounded}% O₂ • ${Math.round(bpm)} bpm`;
+                    statsPill.textContent = `${spo2Rounded}% O₂ • ${bpmRounded} BPM`;
                 }
-                if (healthEl) healthEl.textContent = `${Math.round(st.health || 100)}%`;
-                if (healthMeta) healthMeta.textContent = st.isSick ? 'Low Oxygen' : 'Healthy';
+                if (healthEl) healthEl.textContent = `${bpmRounded} BPM`;
+                if (healthMeta) healthMeta.textContent = 'In typical range';
+                if (vitalsBadge) {
+                    vitalsBadge.textContent = 'TYPICAL RANGE';
+                    vitalsBadge.style.color = '#30d158';
+                    vitalsBadge.style.borderColor = 'rgba(48, 209, 88, 0.35)';
+                    vitalsBadge.style.background = 'rgba(48, 209, 88, 0.15)';
+                }
+                if (rhythmText) rhythmText.textContent = 'SINUS RHYTHM';
             }
         }
     }
@@ -887,12 +1015,12 @@ export class BunnyCompanion {
         }
         ctx.stroke();
 
-        // Neon Glow Trace
-        const strokeColor = isDead ? '#ef4444' : (this.oxygenLevel < 60 ? '#f59e0b' : '#10b981');
+        // Neon Glow Trace — Apple Health Green / Amber
+        const strokeColor = isDead ? '#ffd60a' : (this.oxygenLevel < 60 ? '#ffd60a' : '#30d158');
         ctx.strokeStyle = strokeColor;
         ctx.shadowColor = strokeColor;
         ctx.shadowBlur = 4;
-        ctx.lineWidth = 1.6;
+        ctx.lineWidth = 1.7;
 
         ctx.beginPath();
         for (let x = 0; x < w; x++) {
@@ -915,36 +1043,78 @@ export class BunnyCompanion {
     }
 
     playPulseBeep() {
+        if (this.stateManager.state.isMuted) return;
         if (!this.audioCtx) this.initAudio();
         if (!this.audioCtx) return;
         try {
+            if (this.audioCtx.state === 'suspended') {
+                this.audioCtx.resume();
+            }
+            // Apple Watch Subtle Sine Haptic Tap
             const osc = this.audioCtx.createOscillator();
             const gain = this.audioCtx.createGain();
-            const freq = Math.max(380, Math.min(950, (this.oxygenLevel / 100) * 880));
-            osc.frequency.setValueAtTime(freq, this.audioCtx.currentTime);
-            gain.gain.setValueAtTime(0.08, this.audioCtx.currentTime);
-            gain.gain.exponentialRampToValueAtTime(0.001, this.audioCtx.currentTime + 0.08);
+            osc.type = 'sine';
+            const baseFreq = 440;
+            osc.frequency.setValueAtTime(baseFreq, this.audioCtx.currentTime);
+            osc.frequency.exponentialRampToValueAtTime(390, this.audioCtx.currentTime + 0.045);
+            gain.gain.setValueAtTime(0.022, this.audioCtx.currentTime);
+            gain.gain.exponentialRampToValueAtTime(0.0001, this.audioCtx.currentTime + 0.045);
             osc.connect(gain);
             gain.connect(this.audioCtx.destination);
             osc.start();
-            osc.stop(this.audioCtx.currentTime + 0.08);
+            osc.stop(this.audioCtx.currentTime + 0.045);
         } catch (_) { }
     }
 
-    playFlatlineBeep() {
+    playMunchSound() {
+        if (this.stateManager.state.isMuted) return;
         if (!this.audioCtx) this.initAudio();
         if (!this.audioCtx) return;
         try {
-            const osc = this.audioCtx.createOscillator();
-            const gain = this.audioCtx.createGain();
-            osc.type = 'sawtooth';
-            osc.frequency.setValueAtTime(320, this.audioCtx.currentTime);
-            gain.gain.setValueAtTime(0.18, this.audioCtx.currentTime);
-            gain.gain.exponentialRampToValueAtTime(0.001, this.audioCtx.currentTime + 1.6);
-            osc.connect(gain);
-            gain.connect(this.audioCtx.destination);
-            osc.start();
-            osc.stop(this.audioCtx.currentTime + 1.6);
+            if (this.audioCtx.state === 'suspended') {
+                this.audioCtx.resume();
+            }
+            // Apple Pay / AirDrop Melodic Two-Tone Chime (C5 -> E5)
+            const notes = [523.25, 659.25];
+            notes.forEach((freq, idx) => {
+                const osc = this.audioCtx.createOscillator();
+                const gain = this.audioCtx.createGain();
+                osc.type = 'sine';
+                const startTime = this.audioCtx.currentTime + idx * 0.07;
+                osc.frequency.setValueAtTime(freq, startTime);
+                gain.gain.setValueAtTime(0.035, startTime);
+                gain.gain.exponentialRampToValueAtTime(0.0001, startTime + 0.16);
+                osc.connect(gain);
+                gain.connect(this.audioCtx.destination);
+                osc.start(startTime);
+                osc.stop(startTime + 0.16);
+            });
+        } catch (_) { }
+    }
+
+    playWakeChime() {
+        if (this.stateManager.state.isMuted) return;
+        if (!this.audioCtx) this.initAudio();
+        if (!this.audioCtx) return;
+        try {
+            if (this.audioCtx.state === 'suspended') {
+                this.audioCtx.resume();
+            }
+            // Apple Ascending Triad Wake Chime (C5 -> E5 -> G5)
+            const notes = [523.25, 659.25, 783.99];
+            notes.forEach((freq, idx) => {
+                const osc = this.audioCtx.createOscillator();
+                const gain = this.audioCtx.createGain();
+                osc.type = 'sine';
+                const startTime = this.audioCtx.currentTime + idx * 0.08;
+                osc.frequency.setValueAtTime(freq, startTime);
+                gain.gain.setValueAtTime(0.03, startTime);
+                gain.gain.exponentialRampToValueAtTime(0.0001, startTime + 0.22);
+                osc.connect(gain);
+                gain.connect(this.audioCtx.destination);
+                osc.start(startTime);
+                osc.stop(startTime + 0.22);
+            });
         } catch (_) { }
     }
 
@@ -953,15 +1123,15 @@ export class BunnyCompanion {
         this.isDragging = false;
         document.body.style.userSelect = '';
         document.body.style.cursor = '';
-        this.targetDangleSway = 0;
+        this.dangleAngle = 0;
+        this.dangleVel = 0;
 
-        // STOP all animation tracks - hands and legs freeze completely
+        // STOP all animation tracks
         if (this.mixer) {
             this.mixer.stopAllAction();
         }
 
         this.stateManager.setDead(true);
-        this.playFlatlineBeep();
         this.applyDeadPoseImmediate();
     }
 
@@ -983,6 +1153,7 @@ export class BunnyCompanion {
             if (this.gltfNodes.earL) this.gltfNodes.earL.rotation.set(0, 0, 0);
             if (this.gltfNodes.earR) this.gltfNodes.earR.rotation.set(0, 0, 0);
             if (this.gltfNodes.cheekL) this.gltfNodes.cheekL.scale.set(1, 1, 1);
+            if (this.gltfNodes.cheekR) this.gltfNodes.cheekR.scale.set(1, 1, 1);
             if (this.gltfNodes.legFrontR) {
                 this.gltfNodes.legFrontR.rotation.set(0, 0, 0);
                 this.gltfNodes.legFrontR.position.set(0.09375, 0.25, -0.3);
@@ -1008,24 +1179,69 @@ export class BunnyCompanion {
         // Stop any running animations
         this.stopAnimation();
 
-        this.spawnFloatingHeart();
+        // Bounce back with landing squash cushion
+        this.landingSquash = 0.24;
+        this.landingSquashVel = -3.5;
+
+        this.playWakeChime();
+        this.spawnFloatingHeart('✨');
         this.updateCornerCapsule(100, 140, false);
     }
 
-    spawnFloatingHeart() {
+    feedCarrot() {
+        this.stateManager.recordCarrotEaten();
+        this.spawnFloatingCarrot();
+        this.playMunchSound();
+
+        if (this.state === 'fainted' || this.stateManager.state.isDead) {
+            this.reviveBunny();
+        } else {
+            this.landingSquash = 0.16;
+            this.landingSquashVel = -2.2;
+            this.spawnFloatingHeart('❤️');
+            if (this.gltfNodes && this.gltfNodes.muzzle) {
+                this.gltfNodes.muzzle.scale.set(1.15, 1.15, 1.0);
+            }
+        }
+    }
+
+    spawnFloatingCarrot() {
+        const carrot = document.createElement('div');
+        carrot.className = 'rabbit-floating-carrot';
+        carrot.textContent = '🥕';
+        const screenX = this.pagePos.x;
+        const screenY = this.pagePos.y - window.scrollY;
+        carrot.style.left = `${screenX + 8}px`;
+        carrot.style.top = `${screenY - 28}px`;
+        document.body.appendChild(carrot);
+        setTimeout(() => carrot.remove(), 1100);
+    }
+
+    spawnFloatingHeart(symbol = '❤️') {
         const heart = document.createElement('div');
         heart.className = 'rabbit-floating-heart';
-        heart.textContent = '❤️';
+        heart.textContent = symbol;
         const screenX = this.pagePos.x;
         const screenY = this.pagePos.y - window.scrollY;
         heart.style.left = `${screenX + 8}px`;
         heart.style.top = `${screenY - 24}px`;
         document.body.appendChild(heart);
-        setTimeout(() => heart.remove(), 1200);
+        setTimeout(() => heart.remove(), 1100);
     }
 
     bindEvents() {
-        // --- 1. Screen & Window Awareness ---
+        // --- 1. Screen & Window Awareness & Energy Saver ---
+        document.addEventListener('visibilitychange', () => {
+            this.isTabHidden = document.hidden;
+            if (document.hidden) {
+                if (this.audioCtx && this.audioCtx.state === 'running') {
+                    this.audioCtx.suspend();
+                }
+            } else {
+                this.clock.getDelta(); // Clear accumulated delta
+            }
+        });
+
         document.addEventListener('mouseleave', () => {
             this.isUserOnScreen = false;
         });
@@ -1054,26 +1270,31 @@ export class BunnyCompanion {
             const hit = this.getHitPart(e.clientX, e.clientY);
 
             if (hit) {
-                // Clicking on rabbit (holding by ears, scruff, body, or head)
+                // Clicking on rabbit while dead / fainted wakes him with carrot!
                 if (this.state === 'fainted' || this.stateManager.state.isDead) {
-                    this.openCapsuleDrawer();
+                    this.feedCarrot();
+                    return;
+                }
+
+                // Clicking on rabbit while snoozing wakes him up!
+                if (this.stateManager.state.isSleeping) {
+                    this.stateManager.toggleSleep();
+                    this.spawnFloatingHeart('☀️');
                     return;
                 }
 
                 this.initAudio();
-                this.isDragging = true;
-                this.heldPart = hit.part; // 'ears', 'head', 'scruff', 'tail', 'body'
-                this.targetPagePos = null;
-                this.isHopping = false;
-                this.isBackflipping = false;
-                this.dragOffset = { x: this.pagePos.x - e.pageX, y: this.pagePos.y - e.pageY };
-                document.body.style.userSelect = 'none';
-                document.body.style.cursor = 'grabbing';
-                this.state = 'held';
-                this.playAnimation('run'); // Dangle legs in air while held
-                this.targetDangleSway = 0;
-                this.dangleSway = 0;
-                e.preventDefault();
+
+                if (e.pointerType === 'mouse' || hit.isDirectHit) {
+                    this.startDragging(e, hit);
+                    e.preventDefault();
+                } else {
+                    // Touch screen proximity tap: prime drag without hijacking page scroll
+                    this.touchStartX = e.clientX;
+                    this.touchStartY = e.clientY;
+                    this.isTouchPrimed = true;
+                    this.primedHit = hit;
+                }
                 return;
             }
 
@@ -1091,14 +1312,22 @@ export class BunnyCompanion {
             this.hasUserMovedPointer = true;
             this.lastUserActivityTime = performance.now();
 
+            // Mobile touch drag threshold check (~12px hysteresis)
+            if (this.isTouchPrimed && !this.isDragging) {
+                const dx = e.clientX - this.touchStartX;
+                const dy = e.clientY - this.touchStartY;
+                if (Math.hypot(dx, dy) > 12) {
+                    this.startDragging(e, this.primedHit);
+                    this.isTouchPrimed = false;
+                    this.primedHit = null;
+                }
+            }
+
             if (this.isDragging) {
                 this.pagePos.x = e.pageX + this.dragOffset.x;
                 this.pagePos.y = e.pageY + this.dragOffset.y;
                 this.clampToBounds();
-                const vx = e.movementX;
-                if (Math.abs(vx) > 0.4) {
-                    this.targetDangleSway = -Math.max(-0.65, Math.min(0.65, vx * 0.05));
-                }
+                this.dragVelocityX = e.movementX || 0;
                 return;
             }
 
@@ -1130,16 +1359,24 @@ export class BunnyCompanion {
 
         // --- 4. Pointer Up (Release from Drag) ---
         window.addEventListener('pointerup', () => {
+            this.isTouchPrimed = false;
+            this.primedHit = null;
+
             if (this.isDragging) {
                 this.isDragging = false;
                 this.heldPart = null;
                 this.clampToBounds();
                 document.body.style.userSelect = '';
                 document.body.style.cursor = '';
-                this.targetDangleSway = 0;
 
                 if (this.state !== 'fainted') {
-                    this.bunnyRoot.rotation.z = 0;
+                    // Physical landing squash-and-stretch cushion
+                    this.landingSquash = 0.22;
+                    this.landingSquashVel = -3.2;
+                    if (navigator.vibrate) {
+                        try { navigator.vibrate(14); } catch (_) {}
+                    }
+
                     if (this.gltfScene) {
                         this.gltfScene.rotation.z = 0;
                         this.gltfScene.rotation.x = 0.38;
@@ -1157,6 +1394,20 @@ export class BunnyCompanion {
                 this.lastDragEndTime = performance.now();
             }
         });
+    }
+
+    startDragging(e, hit) {
+        this.isDragging = true;
+        this.heldPart = hit ? hit.part : 'scruff';
+        this.targetPagePos = null;
+        this.isHopping = false;
+        this.isBackflipping = false;
+        this.dragOffset = { x: this.pagePos.x - e.pageX, y: this.pagePos.y - e.pageY };
+        this.dragVelocityX = 0;
+        document.body.style.userSelect = 'none';
+        document.body.style.cursor = 'grabbing';
+        this.state = 'held';
+        this.playAnimation('run');
     }
 
     listenToGlobalState() {
@@ -1177,6 +1428,11 @@ export class BunnyCompanion {
     animate() {
         requestAnimationFrame(() => this.animate());
 
+        // Respect battery: skip render loop when tab is hidden
+        if (this.isTabHidden) {
+            return;
+        }
+
         const delta = Math.min(this.clock.getDelta(), 0.1);
         const time = this.clock.getElapsedTime();
         const now = performance.now();
@@ -1184,6 +1440,18 @@ export class BunnyCompanion {
         // Update mixer when active in air while being held
         if (this.mixer && this.isDragging) {
             this.mixer.update(delta);
+        }
+
+        // Squash-and-stretch landing cushion spring physics
+        if (Math.abs(this.landingSquash) > 0.001 || Math.abs(this.landingSquashVel) > 0.001) {
+            const squashK = 180.0;
+            const squashDamping = 14.0;
+            const squashAccel = -squashK * this.landingSquash - squashDamping * this.landingSquashVel;
+            this.landingSquashVel += squashAccel * delta;
+            this.landingSquash += this.landingSquashVel * delta;
+        } else {
+            this.landingSquash = 0;
+            this.landingSquashVel = 0;
         }
 
         // --- Safe-Distance Pointer Following Controller ---
@@ -1196,7 +1464,8 @@ export class BunnyCompanion {
             !this.isBackflipping &&
             !this.isDragging &&
             this.state !== 'fainted' &&
-            !this.stateManager.state.isDead
+            !this.stateManager.state.isDead &&
+            !this.stateManager.state.isSleeping
         ) {
             const distToCursor = Math.hypot(this.lastKnownPointer.x - this.pagePos.x, this.lastKnownPointer.y - this.pagePos.y);
 
@@ -1228,8 +1497,8 @@ export class BunnyCompanion {
             }
         }
 
-        // Polite Safe Distance Relocation (Slow, Gentle Jumping Locomotion)
-        if (this.targetPagePos && !this.isDragging && this.state !== 'fainted' && !this.stateManager.state.isDead) {
+        // Polite Safe Distance Relocation (Episodic, Natural Rabbit Locomotion)
+        if (this.targetPagePos && !this.isDragging && this.state !== 'fainted' && !this.stateManager.state.isDead && !this.stateManager.state.isSleeping) {
             const dx = this.targetPagePos.x - this.pagePos.x;
             const dy = this.targetPagePos.y - this.pagePos.y;
             const dist = Math.hypot(dx, dy);
@@ -1244,11 +1513,15 @@ export class BunnyCompanion {
             } else {
                 this.isHopping = true;
 
-                // Slow, gentle, realistic jumping speed & rhythm
-                this.hopCycle += delta * 5.2; // Relaxed, graceful rabbit hop cadence
-                const speed = Math.min(75, dist * 1.8 + 20); // Gentle, slow following speed (max 75px/s)
-                this.pagePos.x += (dx / dist) * speed * delta;
-                this.pagePos.y += (dy / dist) * speed * delta;
+                // Episodic, rhythmic rabbit hop cadence
+                this.hopCycle += delta * 5.4;
+                const jumpPhase = Math.sin(this.hopCycle);
+                const jumpLift = Math.max(0, jumpPhase);
+                // Translate primarily while airborne
+                const leapImpulse = jumpLift > 0 ? (jumpLift * 1.5) : 0.15;
+                const speed = Math.min(85, dist * 2.0 + 20);
+                this.pagePos.x += (dx / dist) * speed * delta * leapImpulse;
+                this.pagePos.y += (dy / dist) * speed * delta * leapImpulse;
 
                 // Smooth 3D heading orientation facing travel direction
                 const targetHeading = Math.atan2(dx, dy);
@@ -1262,13 +1535,15 @@ export class BunnyCompanion {
             this.isHopping = false;
         }
 
-        // Random Joyful Backflip (Binky) Trigger
+        // Random Joyful Backflip (Binky) Trigger (Respects reduced motion preference)
         if (
+            !this.prefersReducedMotion &&
             this.state === 'idle' &&
             !this.isDragging &&
             !this.isHopping &&
             !this.isBackflipping &&
             !this.stateManager.state.isDead &&
+            !this.stateManager.state.isSleeping &&
             this.isUserOnScreen &&
             !this.isUserInteracting &&
             (now - this.lastBackflipTime > this.nextBackflipInterval)
@@ -1283,9 +1558,9 @@ export class BunnyCompanion {
             // Held up in air by the scruff of the neck!
             this.state = 'held';
 
-            // Choking / Suffocation
-            this.oxygenLevel = Math.max(0, this.oxygenLevel - delta * 18.0);
-            this.heartRate = Math.min(215, 140 + (100 - this.oxygenLevel) * 0.95);
+            // Gradual holding fatigue (~14 seconds)
+            this.oxygenLevel = Math.max(0, this.oxygenLevel - delta * 7.2);
+            this.heartRate = Math.min(205, 140 + (100 - this.oxygenLevel) * 0.75);
 
             if (now - this.lastBeepTime > (60000 / this.heartRate)) {
                 this.lastBeepTime = now;
@@ -1333,11 +1608,18 @@ export class BunnyCompanion {
                     }
                 }
 
-                this.dangleSway = THREE.MathUtils.lerp(this.dangleSway, this.targetDangleSway, delta * 9.0);
-                this.targetDangleSway *= 0.93;
-                this.bunnyRoot.rotation.z = this.dangleSway;
+                // Damped harmonic pendulum spring inertia
+                const springK = 38.0;
+                const damping = 6.2;
+                const force = -Math.max(-15, Math.min(15, this.dragVelocityX || 0)) * 0.08;
+                this.dangleAccel = -springK * this.dangleAngle - damping * this.dangleVel + force;
+                this.dangleVel += this.dangleAccel * delta;
+                this.dangleAngle += this.dangleVel * delta;
+                this.dangleAngle = Math.max(-0.65, Math.min(0.65, this.dangleAngle));
+                this.bunnyRoot.rotation.z = this.dangleAngle;
+                this.dragVelocityX = (this.dragVelocityX || 0) * 0.88;
 
-                // Little panicked paddling legs, hands, and feet while suspended
+                // Little paddling legs, hands, and feet while suspended
                 const scramble = Math.sin(time * 16);
                 if (this.gltfNodes) {
                     if (this.gltfNodes.legFrontR) this.gltfNodes.legFrontR.rotation.x = scramble * 0.42;
@@ -1350,6 +1632,61 @@ export class BunnyCompanion {
                     if (this.gltfNodes.footHindL) this.gltfNodes.footHindL.rotation.x = -scramble * 0.32;
                 }
             }
+        } else {
+            // Natural damped spring settling for dangleAngle
+            if (Math.abs(this.dangleAngle) > 0.001 || Math.abs(this.dangleVel) > 0.001) {
+                const springK = 32.0;
+                const damping = 6.8;
+                this.dangleAccel = -springK * this.dangleAngle - damping * this.dangleVel;
+                this.dangleVel += this.dangleAccel * delta;
+                this.dangleAngle += this.dangleVel * delta;
+                this.bunnyRoot.rotation.z = this.dangleAngle;
+            } else {
+                this.dangleAngle = 0;
+                this.dangleVel = 0;
+            }
+        }
+
+        if (this.stateManager.state.isSleeping && !this.isDragging) {
+            // ==============================================================
+            // PEACEFUL SNOOZE / SLEEPING STATE
+            // Calmly curled up on the desk surface, breathing deeply & quietly
+            // ==============================================================
+            this.state = 'sleeping';
+            if (this.mixer) {
+                this.mixer.stopAllAction();
+            }
+            this.currentAction = null;
+
+            const sleepBreath = Math.sin(time * 1.2) * 0.008;
+            if (this.gltfScene) {
+                const baseS = this.gltfBaseScale || 1.0;
+                this.gltfScene.position.y = THREE.MathUtils.lerp(this.gltfScene.position.y, -0.32 + sleepBreath * 0.2, delta * 4.0);
+                this.gltfScene.rotation.x = THREE.MathUtils.lerp(this.gltfScene.rotation.x, 0.16, delta * 4.0);
+                this.gltfScene.rotation.z = 0;
+                this.gltfScene.scale.set(baseS * (1.0 + sleepBreath * 0.3), baseS * (1.0 + sleepBreath), baseS * (1.0 + sleepBreath * 0.3));
+            }
+
+            if (this.gltfNodes) {
+                if (this.gltfNodes.head) {
+                    this.gltfNodes.head.rotation.set(-0.16, 0, 0);
+                }
+                if (this.gltfNodes.earL) {
+                    this.gltfNodes.earL.rotation.set(0.08, 0, -0.42);
+                }
+                if (this.gltfNodes.earR) {
+                    this.gltfNodes.earR.rotation.set(0.08, 0, 0.42);
+                }
+                if (this.gltfNodes.cheekL) this.gltfNodes.cheekL.scale.y = 0.05;
+                if (this.gltfNodes.cheekR) this.gltfNodes.cheekR.scale.y = 0.05;
+
+                if (this.gltfNodes.legFrontR) this.gltfNodes.legFrontR.rotation.set(0, 0, 0);
+                if (this.gltfNodes.legFrontL) this.gltfNodes.legFrontL.rotation.set(0, 0, 0);
+                if (this.gltfNodes.legHindR) this.gltfNodes.legHindR.rotation.set(0, 0, 0);
+                if (this.gltfNodes.legHindL) this.gltfNodes.legHindL.rotation.set(0, 0, 0);
+            }
+
+            this.updateCornerCapsule(this.oxygenLevel, 82, false);
         } else if (this.state === 'fainted' || this.stateManager.state.isDead) {
             // ==============================================================
             // REALISTIC DEAD STATE: ZERO MOVEMENT IN HANDS OR LEGS
@@ -1847,6 +2184,30 @@ export class BunnyCompanion {
             }
         }
 
+        // Dynamic Ground Contact Shadow
+        if (this.shadowMesh) {
+            const isFainted = (this.state === 'fainted' || this.stateManager.state.isDead);
+            const modelY = this.gltfScene ? (this.gltfScene.position.y - (-0.28)) : 0;
+            const dragLift = this.isDragging ? 0.42 : 0;
+            const totalLift = Math.max(0, modelY + dragLift);
+
+            const baseShadowScale = 1.0 + (this.landingSquash || 0) * 0.4;
+            const shadowScale = Math.max(0.35, (1.0 - totalLift * 0.45) * baseShadowScale);
+            this.shadowMesh.scale.set(shadowScale, shadowScale, 1.0);
+            this.shadowMesh.material.opacity = Math.max(0.08, (isFainted ? 0.22 : 0.42) - totalLift * 0.32);
+            this.shadowMesh.position.y = -0.34 - (this.isDragging ? 0.42 : 0);
+        }
+
+        // Apply physical landing squash-and-stretch on model
+        if (this.gltfScene && this.landingSquash !== 0 && this.state !== 'fainted' && this.state !== 'sleeping') {
+            const baseS = this.gltfBaseScale || 1.0;
+            this.gltfScene.scale.set(
+                baseS * (1.0 + this.landingSquash * 0.45),
+                baseS * (1.0 - this.landingSquash),
+                baseS * (1.0 + this.landingSquash * 0.45)
+            );
+        }
+
         // World coordinates
         const screenX = this.pagePos.x;
         const screenY = this.pagePos.y - window.scrollY;
@@ -1858,8 +2219,8 @@ export class BunnyCompanion {
         const lift = this.isDragging ? 0.42 : ((this.state === 'fainted' || this.stateManager.state.isDead) ? -0.06 : 0);
         this.bunnyRoot.position.y = worldPos.y + lift;
 
-        // Live EKG wave rendering for Corner Capsule Drawer
-        if (this.ekgCanvas && this.cornerCapsuleEl) {
+        // Live EKG wave rendering ONLY when Corner Capsule Drawer is expanded
+        if (this.ekgCanvas && this.cornerCapsuleEl && this.cornerCapsuleEl.classList.contains('expanded')) {
             this.drawEKGWave(delta);
         }
 

@@ -10,12 +10,14 @@ const DEFAULT_STATE = {
     health: 100,            // 0 - 100
     oxygen: 100,            // 0 - 100 (%SpO2)
     isDead: false,          // Persisted life/death flag
-    deathCount: 0,          // Number of times bunny died today
+    deathCount: 0,          // Number of times bunny fainted today
     deadSince: null,        // Timestamp of death or null
     carrotsEatenToday: 0,   // Number of carrots eaten today
     lastFedTime: Date.now(),
     lastFedDate: new Date().toISOString().split('T')[0],
     isSick: false,          // Critical condition flag
+    isMuted: false,         // Audio pulse / beep mute toggle
+    isSleeping: false,      // Peaceful snooze / rest mode
     lastUpdated: Date.now()
 };
 
@@ -98,18 +100,36 @@ export class BunnyState {
         this.checkDayReset();
         this.state.carrotsEatenToday = (this.state.carrotsEatenToday || 0) + 1;
         this.state.lastFedTime = Date.now();
-        this.state.health = Math.min(100, this.state.health + 20);
-        this.state.oxygen = Math.min(100, this.state.oxygen + 15);
+        this.state.isDead = false;
+        this.state.deadSince = null;
+        this.state.health = Math.min(100, Math.max(70, this.state.health + 30));
+        this.state.oxygen = 100;
         this.saveState();
     }
 
-    // --- Admin Revival ---
-    adminRevive() {
+    toggleMute() {
+        this.state.isMuted = !this.state.isMuted;
+        this.saveState();
+        return this.state.isMuted;
+    }
+
+    toggleSleep() {
+        this.state.isSleeping = !this.state.isSleeping;
+        this.saveState();
+        return this.state.isSleeping;
+    }
+
+    revive() {
         this.state.isDead = false;
         this.state.health = 100;
         this.state.oxygen = 100;
         this.state.deadSince = null;
         this.saveState();
+    }
+
+    // --- Admin Revival ---
+    adminRevive() {
+        this.revive();
     }
 
     // --- Observer Pattern ---

@@ -1,0 +1,33 @@
+<svg viewBox="0 0 330 80" width="100%" height="100%" preserveAspectRatio="none" class="anime-cloud-bg">
+  <defs>
+    <linearGradient id="gActionBody" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#ffffff" />
+      <stop offset="60%" stop-color="#f8faff" />
+      <stop offset="85%" stop-color="#e4f0fe" />
+      <stop offset="100%" stop-color="#cfe4fd" />
+    </linearGradient>
+    <linearGradient id="gActionShadow" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#c7dffc" stop-opacity="0" />
+      <stop offset="100%" stop-color="#b2d2fa" stop-opacity="0.9" />
+    </linearGradient>
+  </defs>
+  <path d="M 38,40 
+    C 20,24 10,38 8,50 
+    C 2,64 16,74 36,74 
+    C 52,78 88,80 120,75 
+    C 150,80 204,80 236,75 
+    C 262,79 296,76 312,66 
+    C 326,56 324,42 312,32 
+    C 316,20 300,8 280,12 
+    C 264,2 236,2 216,10 
+    C 196,2 160,2 140,10 
+    C 120,2 88,3 70,12 
+    C 54,4 38,12 32,26 
+    C 24,28 22,36 38,40 Z" 
+    fill="url(#gActionBody)" stroke="#1e293b" stroke-width="2.4" stroke-linejoin="round" stroke-linecap="round" />
+  <path d="M 14,56 C 24,74 58,77 120,75 C 150,80 204,80 236,75 C 262,79 296,76 312,66 C 294,70 248,64 196,60 C 144,56 74,68 14,56 Z" fill="url(#gActionShadow)" />
+  <ellipse cx="100" cy="22" rx="40" ry="12" fill="#ffffff" opacity="0.9" />
+  <ellipse cx="220" cy="20" rx="50" ry="13" fill="#ffffff" opacity="0.95" />
+  <path d="M 68,28 C 86,18 112,20 124,30" fill="none" stroke="#a5c7f4" stroke-width="1.8" stroke-linecap="round" />
+  <path d="M 184,26 C 206,16 238,18 252,28" fill="none" stroke="#a5c7f4" stroke-width="1.8" stroke-linecap="round" />
+</svg>

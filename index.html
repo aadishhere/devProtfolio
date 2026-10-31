@@ -5,11 +5,11 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <title>Aadish Jain | Product Manager & Technical Leader</title>
+    <title>Aadish Jain — Technical Product Manager &amp; Builder</title>
     <link rel="icon" type="image/png" href="assets/favicon.webp">
 
     <meta name="description"
-        content="Product Manager with deep software engineering roots. Specializing in high-velocity product execution, B2B SaaS, spatial computing, and user-obsessed products.">
+        content="Technical Product Manager with software engineering roots. Shipping 0 → 1 products across spatial computing, AI, and scalable B2B systems.">
 
     <!-- Three.js 3D Library & GLTF Loader for Blinky -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
@@ -24,43 +24,108 @@
 <body>
 
     <!-- ==========================================================================
-         Header & Navigation
+         Site Header — Minimalist Apple Floating Glass Navigation
          ========================================================================== -->
-    <header class="site-header">
-        <div class="site-container nav-container">
-            <a href="index.html" class="brand-logo">
-                <span class="brand-dot"></span>
-                <span>Aadish Jain</span>
-                <span class="brand-role">Product</span>
+    <header class="apple-site-header" role="banner">
+        <nav class="apple-nav-container" aria-label="Main Navigation">
+            <!-- Brand Identity -->
+            <a href="index.html" class="apple-brand-island" aria-label="Aadish Jain Home">
+                <span class="apple-brand-avatar" aria-hidden="true"><i class="fa-solid fa-terminal"></i></span>
+                <span class="apple-brand-title">Aadish Jain</span>
+                <span class="apple-brand-pill">PM • 0→1</span>
             </a>
 
-            <nav>
-                <ul class="nav-links">
-                    <li><a href="index.html" class="nav-link active"><i class="fa-solid fa-compass"></i> Home</a></li>
-                    <li><a href="projects.html" class="nav-link"><i class="fa-solid fa-layer-group"></i> Projects</a></li>
-                    <li><a href="reviews.html" class="nav-link"><i class="fa-solid fa-star"></i> Reviews</a></li>
-                </ul>
-            </nav>
-
-            <div class="nav-right-controls">
-                <button class="control-icon-btn js-theme-toggle" aria-label="Toggle Theme" title="Toggle Light/Dark Theme">
-                    <i class="fa-regular fa-sun"></i>
-                </button>
-                <a href="https://linkedin.com/in/aadishhere" target="_blank" class="control-icon-btn" aria-label="LinkedIn">
-                    <i class="fa-brands fa-linkedin-in"></i>
+            <!-- Segmented Navigation Track -->
+            <div class="apple-segmented-nav" role="tablist">
+                <a href="index.html" class="apple-nav-tab active" aria-current="page">
+                    <i class="fa-solid fa-compass" aria-hidden="true"></i>
+                    <span>Home</span>
                 </a>
-                <a href="https://github.com/aadishhere" target="_blank" class="control-icon-btn" aria-label="GitHub">
-                    <i class="fa-brands fa-github"></i>
+                <a href="projects.html" class="apple-nav-tab">
+                    <i class="fa-solid fa-layer-group" aria-hidden="true"></i>
+                    <span>Projects</span>
+                </a>
+                <a href="reviews.html" class="apple-nav-tab">
+                    <i class="fa-solid fa-star" aria-hidden="true"></i>
+                    <span>Reviews</span>
                 </a>
             </div>
-        </div>
+
+            <!-- Utility Controls & Primary CTA -->
+            <div class="apple-controls-group">
+                <button class="apple-glass-btn js-theme-toggle" aria-label="Toggle Light/Dark Theme" title="Toggle Theme">
+                    <i class="fa-regular fa-sun" aria-hidden="true"></i>
+                </button>
+                <a href="https://linkedin.com/in/aadishhere" target="_blank" rel="noopener noreferrer" class="apple-glass-btn" aria-label="LinkedIn Profile" title="LinkedIn">
+                    <i class="fa-brands fa-linkedin-in" aria-hidden="true"></i>
+                </a>
+                <a href="https://github.com/aadishhere" target="_blank" rel="noopener noreferrer" class="apple-glass-btn" aria-label="GitHub Profile" title="GitHub">
+                    <i class="fa-brands fa-github" aria-hidden="true"></i>
+                </a>
+                <a href="mailto:aadishhere@gmail.com" class="apple-prominent-cta" title="Contact Aadish">
+                    <span>Let’s Talk</span>
+                    <i class="fa-solid fa-arrow-right" aria-hidden="true"></i>
+                </a>
+            </div>
+        </nav>
     </header>
 
     <!-- ==========================================================================
-         Workspace Area (Ready for your new section redesigns)
+         Hero Section — Apple Keynote / Spatial Showcase
          ========================================================================== -->
-    <main class="site-container" style="min-height: calc(100vh - 170px); display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; padding: 60px 20px;">
-        <!-- Clean workspace: Ready for your new section designs -->
+    <main class="apple-hero-section">
+        <div class="site-container apple-hero-stage">
+            
+            <!-- Left: Typographic Authority & Product Manager Proposition -->
+            <div class="apple-hero-editorial">
+                <div class="apple-origin-tag">
+                    <span>Product Manager from</span>
+                    <span class="flag" aria-label="India">🇮🇳</span>
+                </div>
+
+                <h1 class="apple-display-title">
+                    Hey, I’m Aadish <span class="wave-hand" aria-hidden="true">👋</span> <span class="title-pronounce" title="Pronunciation: aa-dee-sh">aa•dee•sh</span>
+                </h1>
+
+                <p class="apple-lead-text">
+                    I help teams build products that solve real problems and win customers. I take ideas from concept to launch, align people around what matters most, and obsess over the details that make great products stand out.
+                </p>
+
+                <!-- Apple Style Unified Action Row -->
+                <div class="apple-action-group">
+                    <a href="projects.html" class="apple-btn-primary">
+                        <span>Explore Work</span>
+                        <i class="fa-solid fa-arrow-right"></i>
+                    </a>
+                    <a href="reviews.html" class="apple-link-secondary">
+                        <span>Peer Reviews</span>
+                        <i class="fa-solid fa-chevron-right"></i>
+                    </a>
+                    <a href="mailto:aadishhere@gmail.com" class="apple-btn-contact" title="Email Aadish Jain">
+                        <i class="fa-regular fa-envelope"></i>
+                        <span>Get in Touch</span>
+                    </a>
+                </div>
+            </div>
+
+            <!-- Right: Pure Tactile Polaroid Showcase (No extraneous UI/text) -->
+            <div class="apple-hero-viewport">
+                <div class="apple-stage-chassis" id="apple-stage-chassis">
+                    <!-- Dynamic Back-Glow Bloom -->
+                    <div class="stage-ambient-glow" id="stage-ambient-glow"></div>
+
+                    <!-- Authentic Physical Polaroid Card -->
+                    <div class="apple-polaroid" id="apple-lens-frame" title="Click photo to switch view">
+                        <div class="polaroid-photo-frame">
+                            <div class="polaroid-glare"></div>
+                            <img src="assets/aadishjain.webp" alt="Aadish Jain — Product Manager" class="lens-portrait portrait-leadership active" width="1080" height="1080" fetchpriority="high">
+                            <img src="assets/helmetopen.webp" alt="Aadish Jain — 0 to 1 Builder" class="lens-portrait portrait-spatial" width="1080" height="1080" loading="lazy">
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+        </div>
     </main>
 
     <!-- ==========================================================================
@@ -69,14 +134,14 @@
     <footer class="site-footer">
         <div class="site-container footer-inner">
             <div class="footer-copy">
-                &copy; 2026 Aadish Jain &bull; Product Manager // Former Software Engineer
+                &copy; 2026 Aadish Jain &bull; Technical Product Manager &amp; Software Engineer
             </div>
 
             <div class="footer-links">
-                <a href="projects.html" class="footer-link">Archive Projects</a>
-                <a href="reviews.html" class="footer-link">Leave a Review</a>
-                <a href="https://linkedin.com/in/aadishhere" target="_blank" class="footer-link">LinkedIn</a>
-                <a href="https://github.com/aadishhere" target="_blank" class="footer-link">GitHub</a>
+                <a href="projects.html" class="footer-link">Selected Work</a>
+                <a href="reviews.html" class="footer-link">Reviews &amp; Notes</a>
+                <a href="https://linkedin.com/in/aadishhere" target="_blank" rel="noopener noreferrer" class="footer-link">LinkedIn</a>
+                <a href="https://github.com/aadishhere" target="_blank" rel="noopener noreferrer" class="footer-link">GitHub</a>
                 <a href="mailto:aadishhere@gmail.com" class="footer-link">aadishhere@gmail.com</a>
             </div>
         </div>

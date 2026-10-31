@@ -1,11 +1,27 @@
 # Aadish Jain — Product Management Portfolio & Operating System
 
-> **A technical Product Manager with deep iOS engineering roots**, bridging technical feasibility, user empathy, and commercial execution.
+> **Technical Product Manager with software engineering roots**, shipping 0 → 1 products across spatial computing, AI, and scalable B2B systems.
 
 📍 Based in Indore, India • Open to Relocate / Remote  
 🔗 Live Portfolio: [aadishjain.com](https://aadishjain.com)  
 💼 LinkedIn: [linkedin.com/in/aadishhere](https://linkedin.com/in/aadishhere)  
 ✉️ Contact: [aadishhere@gmail.com](mailto:aadishhere@gmail.com)
+
+---
+
+## 🚀 How to Run Locally
+
+You can run this portfolio locally on any Mac or Linux machine with one command:
+
+```bash
+./start.sh
+```
+
+Or manually:
+```bash
+python3 -m http.server 8000
+```
+Then open [http://localhost:8000](http://localhost:8000) in your browser.
 
 ---
 
